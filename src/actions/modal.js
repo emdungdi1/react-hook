@@ -44,3 +44,15 @@ export const changeModalContentGiay = (componentGiay) => ({
         componentGiay,
     },
 });
+
+export const getToken = () => ({
+    type: contant.GET_TOKEN,
+    payload: {},
+});
+
+export const setterToken = (data) => ({
+    type: contant.SETTER_TOKEN,
+    payload: {
+        data,
+    },
+});

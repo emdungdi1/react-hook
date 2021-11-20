@@ -7,7 +7,12 @@ function SelectSize(props) {
 		setSize(e.target.value);
 		arrSize.map((arr, index) => {
 			if (parseInt(e.target.value) === arr.ten_size) {
-				props.selectSizes({ id_size: arr.ten_size, ten_size: arr.ten_size });
+				props.selectSizes({
+					id_size: arr.ten_size,
+					ten_size: arr.ten_size,
+					gia_ban: arr.gia_ban,
+					soluong: arr.so_luong,
+				});
 			}
 		});
 	}

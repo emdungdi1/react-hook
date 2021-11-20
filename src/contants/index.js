@@ -11,7 +11,14 @@ import ThuongHieuTC from './../component/Page/ThuongHieuTC/index';
 import SanPhamMoi from './../component/Page/SanPhamMoi/index';
 import DangNhap from './../component/Page/DangNhap/index';
 import XemSanPham from './../component/Page/XemSanPham/index';
+import DatHang from './../component/Page/Dathang/index';
 export const API_ENPOINT = 'https://nhatdoan.herokuapp.com';
+
+export const ROUTESDH = [{
+    path: '/DatHang',
+    exact: true,
+    component: DatHang,
+}, ];
 
 export const ROUTESSTC = [{
         path: '/',

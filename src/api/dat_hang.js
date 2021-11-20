@@ -1,4 +1,3 @@
-import axiosService from './axiosService';
 import axios from 'axios';
 
 const token = JSON.parse(localStorage.getItem('token'));
@@ -29,7 +28,7 @@ export const upload = (file) => {
 };
 
 export const Them = (data) => {
-    return axiosService.post(`${URL}/${url_them_dat_hang}`, data);
+    return authAxios.post(`/api/dat_hang`, data);
 };
 
 export const getList = () => {

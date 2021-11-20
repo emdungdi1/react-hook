@@ -13,14 +13,16 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as actionLoaiGiay from './../../actions/loai_giay';
 import * as actionGiay from './../../actions/giay';
+import * as actionModal from './../../actions/modal';
 import jwt from 'jsonwebtoken';
 
 function DashBoard(props) {
-	const { children, name, ListLoaiGiay, createActionNP } = props;
+	const { children, name, ListLoaiGiay, createActionNP, createModal, token } = props;
 	const [sidebar, setSidebar] = useState(false);
+	const { showModal } = createModal;
 	const { fetchListNewProductRequest, fetchListChiTietMauSacRequest, fetchListChiTietSizeRequest } = createActionNP;
 	const { show, setShow } = useState(false);
-	const [token, setToken] = useState(null);
+	const [tokens, setTokens] = useState(null);
 	const history = useHistory();
 	useEffect(() => {
 		let current = true;
@@ -29,19 +31,19 @@ function DashBoard(props) {
 				await fetchListNewProductRequest();
 				await fetchListChiTietMauSacRequest();
 				await fetchListChiTietSizeRequest();
-				const tokens = localStorage.getItem('tokenTC');
-				if (tokens) {
+				const tokenss = localStorage.getItem('tokenTC');
+				if (tokenss) {
 					try {
-						var decoded = jwt.verify(tokens, 'qwe1234');
+						var decoded = jwt.verify(tokenss, 'qwe1234');
 						if (decoded.result) {
-							setToken(decoded.result);
+							setTokens(decoded.result);
 						}
 					} catch (err) {
 						// err
 					}
 					//qwe1234
 				} else {
-					setToken(null);
+					setTokens(null);
 				}
 			}
 			await fetchPostsList();
@@ -55,19 +57,19 @@ function DashBoard(props) {
 				await fetchListNewProductRequest();
 				await fetchListChiTietMauSacRequest();
 				await fetchListChiTietSizeRequest();
-				const tokens = localStorage.getItem('tokenTC');
-				if (tokens) {
+				const tokenss = localStorage.getItem('tokenTC');
+				if (tokenss) {
 					try {
-						var decoded = jwt.verify(tokens, 'qwe1234');
+						var decoded = jwt.verify(tokenss, 'qwe1234');
 						if (decoded.result) {
-							setToken(decoded.result);
+							setTokens(decoded.result);
 						}
 					} catch (err) {
 						// err
 					}
 					//qwe1234
 				} else {
-					setToken(null);
+					setTokens(null);
 				}
 			}
 			await fetchPostsList();
@@ -101,7 +103,11 @@ function DashBoard(props) {
 	}
 	function deleteLocal() {
 		localStorage.removeItem('tokenTC');
-		setToken(null);
+		setTokens(null);
+	}
+
+	function showModals() {
+		showModal();
 	}
 	return (
 		<div key={name} className="chia">
@@ -121,8 +127,8 @@ function DashBoard(props) {
 							</div>
 							<ul>
 								<li>
-									{token !== null ? (
-										<a rel="nofollow">{`Xin chào ${token.ten_khach_hang}`}</a>
+									{tokens !== null ? (
+										<a rel="nofollow">{`Xin chào ${tokens.ten_khach_hang}`}</a>
 									) : (
 										<Link rel="nofollow" to="/DangNhap" title="Đăng Nhập">
 											Đăng nhập
@@ -130,7 +136,7 @@ function DashBoard(props) {
 									)}
 								</li>
 								<li>
-									{token !== null ? (
+									{tokens !== null ? (
 										<a rel="nofollow" title="Đăng ký" onClick={deleteLocal}>
 											Đăng xuất
 										</a>
@@ -142,9 +148,14 @@ function DashBoard(props) {
 								</li>
 							</ul>
 						</div>
-						<div className="giohang flex-dk" title="Giỏ hàng">
+						<div className="giohang flex-dk" title="Giỏ hàng" onClick={showModals}>
 							<div className="title-giohang">Giỏ hàng</div>
-							<ShoppingCartIcon></ShoppingCartIcon>
+							<div className="cart">
+								<div className="cart-product">
+									<div className="cart-poduct-sl">{token.length}</div>
+									<ShoppingCartIcon className="cart-product__icon"></ShoppingCartIcon>
+								</div>
+							</div>
 						</div>
 						<div className="search flex-dk" title="Tìm kiếm">
 							<div className="title-search">Tìm kiếm</div>
@@ -242,12 +253,14 @@ const mapDispatchToProps = (dispatch) => {
 	return {
 		CreateActionLoaiGiay: bindActionCreators(actionLoaiGiay, dispatch),
 		createActionNP: bindActionCreators(actionGiay, dispatch),
+		createModal: bindActionCreators(actionModal, dispatch),
 	};
 };
 
 const mapStateToProps = (state) => {
 	return {
 		ListLoaiGiay: state.loaigiay.ListLoaiGiay,
+		token: state.modal.token,
 	};
 };
 

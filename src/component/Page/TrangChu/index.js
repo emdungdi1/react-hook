@@ -84,7 +84,7 @@ function TrangChu(props) {
 								);
 							})
 						) : (
-							<div>sssss</div>
+							<div></div>
 						)}
 					</OwlCarousel>
 
@@ -162,7 +162,11 @@ function TrangChu(props) {
 													arr.push(d[i]);
 												}
 												return (
-													<Link key={index + 1} to="/SanPhamMoi" className="title-hp">
+													<Link
+														key={index + 1}
+														to={`/XemSamPham/${m.id}`}
+														className="title-hp"
+													>
 														<div className="one-procut">
 															<div className="width-image">
 																<img

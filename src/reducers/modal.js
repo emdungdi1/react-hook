@@ -2,9 +2,7 @@ import * as types from './../contants/modal';
 
 const initialState = {
     showmodal: false,
-    component: null,
-    showmodalGiay: false,
-    componentGiay: null,
+    token: JSON.parse(localStorage.getItem('product')) ? JSON.parse(localStorage.getItem('product')) : [],
 };
 
 const reducer = (state = initialState, action) => {
@@ -21,60 +19,17 @@ const reducer = (state = initialState, action) => {
                 return {
                     ...state,
                     showmodal: false,
-                    title: '',
-                    component: null,
                 };
             }
-        case types.CHANGE_MODAL_TITLE:
+        case types.SETTER_TOKEN:
             {
-                const { title } = action.payload;
+                const { data } = action.payload;
                 return {
                     ...state,
-                    title,
-                };
-            }
-        case types.CHANGE_MODAL_CONTENT:
-            {
-                const { component } = action.payload;
-                return {
-                    ...state,
-                    component,
+                    token: data,
                 };
             }
 
-            //modal giay
-        case types.SHOW_MODAL_GIAY:
-            {
-                return {
-                    ...state,
-                    showmodalGiay: true,
-                };
-            }
-        case types.HIDE_MODAL_GIAY:
-            {
-                return {
-                    ...state,
-                    showmodalGiay: false,
-                    title: '',
-                    componentGiay: null,
-                };
-            }
-        case types.CHANGE_MODAL_GIAY_TITLE:
-            {
-                const { titleGiay } = action.payload;
-                return {
-                    ...state,
-                    titleGiay,
-                };
-            }
-        case types.CHANGE_MODAL_GIAY_CONTENT:
-            {
-                const { componentGiay } = action.payload;
-                return {
-                    ...state,
-                    componentGiay,
-                };
-            }
         default:
             return state;
     }

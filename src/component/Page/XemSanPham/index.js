@@ -8,22 +8,29 @@ import 'owl.carousel/dist/assets/owl.carousel.css';
 import 'owl.carousel/dist/assets/owl.theme.default.css';
 import * as apiImage from './../../../contants/index';
 import { Link } from 'react-router-dom';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import * as ActionModal from './../../../actions/modal';
+import { useHistory } from 'react-router-dom';
 function XemSanPham(props) {
+	const { CreateModal } = props;
+	const history = useHistory();
 	const [data, setData] = useState({});
 	const [dataTam, setDataTam] = useState([]);
 	const [dataTamAll, setDataTamAll] = useState([]);
-	const [mausac, setMausac] = useState([]);
 	const [dataSubmit, setDataSubmit] = useState({
 		id_giay: '',
+		ten_giay: '',
 		gia_ban: 0,
 		id_size: 0,
 		ten_size: 0,
 		id_mau_sac: 0,
 		ten_mau_sac: '',
-		soluong: '',
-		tongtien: 0,
+		soluong: 0,
+		hinh_anh: '',
+		soluong_con: 0,
 	});
-
+	const [mausac, setMausac] = useState([]);
 	useEffect(() => {
 		if (props.match.params) {
 			function fetchPostsLists() {
@@ -109,19 +116,23 @@ function XemSanPham(props) {
 			});
 			setData(dataTLG);
 			if (dataTLG.length > 0) {
+				const d = dataTLG[0].mausac[0].hinh_anh.split(',');
 				setDataSubmit((dataSubmit) => ({
 					...dataSubmit,
 					id_giay: dataTLG[0].id,
+					ten_giay: dataTLG[0].ten_giay,
 					gia_ban: dataTLG[0].mausac[0].size[0].gia_ban,
-					id_size: dataTLG[0].mausac[0].size[0].id,
+					id_size: dataTLG[0].mausac[0].size[0].id_size,
 					ten_size: dataTLG[0].mausac[0].size[0].ten_size,
-					id_mau_sac: dataTLG[0].mausac[0].id,
+					soluong_con: dataTLG[0].mausac[0].size[0].so_luong,
+					id_mau_sac: dataTLG[0].mausac[0].id_mau_sac,
 					ten_mau_sac: dataTLG[0].mausac[0].ten_mau_sac,
 					soluong: 1,
-					tongtien: 0,
+					hinh_anh: d[0],
 				}));
 			}
 		}
+
 		return () => (current = false);
 	}, [dataTam, dataTamAll]);
 
@@ -129,19 +140,31 @@ function XemSanPham(props) {
 		e.preventDefault();
 	}
 	function fast_select(datas) {
-		setDataSubmit((dataSubmit) => ({
-			...dataSubmit,
-			id_mau_sac: datas.id_mau_sac,
-			ten_mau_sac: datas.ten_mau_sac,
-			id_size: data[0].mausac[0].size[0].id,
-			ten_size: data[0].mausac[0].size[0].ten_size,
-		}));
+		const m = data[0].mausac.filter((arr, index) => arr.id_mau_sac === datas.id_mau_sac);
+		if (m.length > 0) {
+			const d = m[0].hinh_anh.split(',');
+			let arr = [];
+			for (var i = 0; i < d.length; i++) {
+				arr.push(d[i]);
+			}
+			setMausac(arr);
+			setDataSubmit((dataSubmit) => ({
+				...dataSubmit,
+				id_mau_sac: datas.id_mau_sac,
+				ten_mau_sac: datas.ten_mau_sac,
+				id_size: data[0].mausac[0].size[0].id,
+				ten_size: data[0].mausac[0].size[0].ten_size,
+				hinh_anh: d[0],
+			}));
+		}
 	}
 	function selectSizes(data) {
 		setDataSubmit((dataSubmit) => ({
 			...dataSubmit,
 			id_size: data.id_size,
 			ten_size: parseInt(data.ten_size),
+			gia_ban: data.gia_ban,
+			soluong_con: data.soluong,
 		}));
 	}
 	function handleQuantity(d) {
@@ -165,9 +188,7 @@ function XemSanPham(props) {
 
 	useEffect(() => {
 		if (data.length > 0) {
-			const m = data[0].mausac.filter((arr, index) => {
-				return arr.id_mau_sac === dataSubmit.id_mau_sac;
-			});
+			const m = data[0].mausac.filter((arr, index) => arr.id_mau_sac === dataSubmit.id_mau_sac);
 			if (m.length > 0) {
 				const d = m[0].hinh_anh.split(',');
 				let arr = [];
@@ -176,97 +197,170 @@ function XemSanPham(props) {
 				}
 				setMausac(arr);
 			}
-			console.log(m);
 		}
-	}, [dataSubmit, data]);
+	}, [data, dataSubmit]);
+	function showModals() {
+		const { setterToken } = CreateModal;
+		var token = localStorage.getItem('tokenTC');
+		if (token) {
+			const dd = JSON.parse(localStorage.getItem('product'));
+			const gb = dataSubmit.gia_ban;
+			const sl = dataSubmit.soluong;
+			let d = [];
+			var dataTamToken = dataSubmit;
+			dataTamToken.tongtien = gb * sl;
 
-	return (
-		<div className="xem_san_pham">
-			<div className="container">
-				<div className="row">
-					<div className="col-xs-12 col-sm-6 col-lg-6 col-md-6">
-						<OwlCarousel items={1} className="owl-theme" loop nav margin={8}>
-							{mausac.length > 0 ? (
-								mausac.map((item, index) => (
-									<Link key={index + 1} to="/SanPhamMoi" className="title-hp">
-										<div className="one-procut">
-											<div className="width-image">
-												<img className="img" src={`${apiImage.API_ENPOINT}/images/${item}`} />
+			if (dd) {
+				let tam = [];
+				tam = dd.filter((item) => {
+					return item.id_giay === dataTamToken.id_giay;
+				});
+
+				if (tam.length > 0) {
+					const i = dd.findIndex((item) => item.id_giay === dataTamToken.id_giay);
+					dataTamToken.soluong = parseInt(dataTamToken.soluong) + parseInt(tam[0].soluong);
+					if (i !== -1) {
+						const newlist = [...dd.slice(0, i), dataTamToken, ...dd.slice(i + 1)];
+
+						d = newlist;
+					}
+				} else {
+					d = dd;
+					d.push(dataTamToken);
+				}
+			} else {
+				d.push(dataTamToken);
+			}
+
+			localStorage.setItem('product', JSON.stringify(d));
+			setterToken(d);
+			const { showModal } = CreateModal;
+			showModal();
+		} else {
+			history.push('/DangNhap');
+		}
+	}
+	if (mausac.length > 0) {
+		return (
+			<div className="xem_san_pham">
+				<div className="container">
+					<div className="row">
+						<div className="col-xs-12 col-sm-6 col-lg-6 col-md-6">
+							<OwlCarousel items={1} className="owl-theme" loop nav margin={8}>
+								{mausac.length > 0 ? (
+									mausac.map((item, index) => {
+										return (
+											<Link key={index + 1} to="/SanPhamMoi" className="title-hp">
+												<div className="one-procut">
+													<div className="width-image">
+														<img
+															className="img"
+															src={`${apiImage.API_ENPOINT}/images/${item}`}
+														/>
+													</div>
+												</div>
+											</Link>
+										);
+									})
+								) : (
+									<div>sss</div>
+								)}
+							</OwlCarousel>
+						</div>
+						<div className="col-xs-12 col-sm-6 col-lg-6 col-md-6">
+							<div className="watch-product">
+								<div className="watch-product__name">
+									CAPTOE BROGUES OXFORD - LIMITED EDITION - OF21
+								</div>
+								<div className="watch-product__price mt-3">
+									<div className="select-fast__modify">Giá bán:</div>
+									<span className="select-fast__modify ml-2">
+										{`${dataSubmit.gia_ban.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`}₫
+									</span>
+								</div>
+								<div className="watch-product__price mt-3">
+									<div className="select-fast__modify">Số lượng còn:</div>
+									<span className="select-fast__modify ml-2">{`${dataSubmit.soluong_con}`}</span>
+								</div>
+								<div className="form_watch  mt-3">
+									<form onSubmit={handleSubmit}>
+										{dataSubmit.id_size !== 0 ? (
+											<SelectSize
+												dataSubmits={dataSubmit}
+												arrSize={data.length > 0 ? data[0].mausac[0].size : []}
+												selectSizes={selectSizes}
+											></SelectSize>
+										) : (
+											<div></div>
+										)}
+
+										{dataSubmit.id_mau_sac !== 0 ? (
+											<SelectFast
+												dataSubmits={dataSubmit}
+												fast_select={fast_select}
+												arrFast={data.length > 0 ? data[0].mausac : []}
+											></SelectFast>
+										) : (
+											<div></div>
+										)}
+										<div className="select-quantity mt-3">
+											<div className="select-quantity__header">số lượng:</div>
+											<div className="select-btn">
+												<span className="select-btn__minus" onClick={() => handleQuantity(-1)}>
+													-
+												</span>
+												<input
+													type="text"
+													value={dataSubmit.soluong}
+													pattern="[+-]?\d+(?:[.,]\d+)?"
+													name="soluong"
+													className="select-btn_quantity"
+													onChange={onChangeSelectQuantity}
+												/>
+												<span className="select-btn__plus" onClick={() => handleQuantity(1)}>
+													+
+												</span>
 											</div>
 										</div>
-									</Link>
-								))
-							) : (
-								<div>sss</div>
-							)}
-						</OwlCarousel>
-					</div>
-					<div className="col-xs-12 col-sm-6 col-lg-6 col-md-6">
-						<div className="watch-product">
-							<div className="watch-product__name">CAPTOE BROGUES OXFORD - LIMITED EDITION - OF21</div>
-							<div className="watch-product__price mt-3">2.550.000₫</div>
-							<div className="form_watch  mt-3">
-								<form onSubmit={handleSubmit}>
-									{dataSubmit.id_size !== 0 ? (
-										<SelectSize
-											dataSubmits={dataSubmit}
-											arrSize={data.length > 0 ? data[0].mausac[0].size : []}
-											selectSizes={selectSizes}
-										></SelectSize>
-									) : (
-										<div></div>
-									)}
-
-									{dataSubmit.id_mau_sac !== 0 ? (
-										<SelectFast
-											dataSubmits={dataSubmit}
-											fast_select={fast_select}
-											arrFast={data.length > 0 ? data[0].mausac : []}
-										></SelectFast>
-									) : (
-										<div></div>
-									)}
-									<div className="select-quantity mt-3">
-										<div className="select-quantity__header">số lượng:</div>
-										<div className="select-btn">
-											<span className="select-btn__minus" onClick={() => handleQuantity(-1)}>
-												-
-											</span>
-											<input
-												type="text"
-												value={dataSubmit.soluong}
-												pattern="[+-]?\d+(?:[.,]\d+)?"
-												name="soluong"
-												className="select-btn_quantity"
-												onChange={onChangeSelectQuantity}
-											/>
-											<span className="select-btn__plus" onClick={() => handleQuantity(1)}>
-												+
-											</span>
+										<div className="clearfix form-group mt-3">
+											<div className="btn-mua btnsold">
+												<button
+													type="submit"
+													data-role="addtocart"
+													className="btn btn-lg btn-gray btn-cart btn_buy add_to_cart"
+													// disabled="disabled"
+													onClick={showModals}
+												>
+													<span className="txt-main">
+														<i className="fa fa-cart-arrow-down padding-right-10"></i> Thêm
+														vào giỏ hàng
+													</span>
+												</button>
+											</div>
 										</div>
-									</div>
-									<div className="clearfix form-group mt-3">
-										<div className="btn-mua btnsold">
-											<button
-												type="submit"
-												data-role="addtocart"
-												className="btn btn-lg btn-gray btn-cart btn_buy add_to_cart"
-												// disabled="disabled"
-											>
-												<span className="txt-main">
-													<i className="fa fa-cart-arrow-down padding-right-10"></i> Mua hàng
-												</span>
-											</button>
-										</div>
-									</div>
-								</form>
+									</form>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-	);
+		);
+	} else {
+		return <div></div>;
+	}
 }
 
-export default XemSanPham;
+const mapDispatchToProps = (dispatch) => {
+	return {
+		CreateModal: bindActionCreators(ActionModal, dispatch),
+	};
+};
+
+const mapStateToProps = (state) => {
+	return {
+		showmodal: state.modal.showmodal,
+	};
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(XemSanPham);

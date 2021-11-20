@@ -5,7 +5,7 @@ import validate from './validateForm/validateForm';
 import * as api from '../../../api/khach_hang';
 import FacebookLogin from 'react-facebook-login';
 import * as notify from '../../../contants/notifycation';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 function DangNhap(props) {
 	const { onChangeInput, handleSubmit, data, setData, errors } = useform(submit, validate);
 	const { email, password } = data;
@@ -149,6 +149,11 @@ function DangNhap(props) {
 									/>
 									{errors.password && <p className="error"> {errors.password} </p>}
 								</div>
+							</div>
+							<div className="centen-button">
+								<Link to="/DangKy" className="btn_dangky">
+									Đăng ký
+								</Link>
 							</div>
 							<div className="centen-button">
 								<button type="submit" className="btn btn-primary text-uppercase add_type">

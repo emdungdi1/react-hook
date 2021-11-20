@@ -4,7 +4,7 @@ import useform from './useForm/useForm';
 import validate from './validateForm/validateForm';
 import * as api from './../../../api/khach_hang';
 import FacebookLogin from 'react-facebook-login';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import * as notify from '../../../contants/notifycation';
 function TaiKhoan(props) {
 	const { onChangeInput, handleSubmit, data, setData, errors } = useform(submit, validate);
@@ -187,6 +187,11 @@ function TaiKhoan(props) {
 									/>
 									{errors.password && <p className="error"> {errors.password} </p>}
 								</div>
+							</div>
+							<div className="centen-button">
+								<Link to="/DangNhap" className="btn_dangky">
+									Đăng Nhập
+								</Link>
 							</div>
 							<div className="centen-button">
 								<button type="submit" className="btn btn-primary text-uppercase add_type">
